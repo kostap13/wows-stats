@@ -50,6 +50,11 @@ router.get('/player', jsonParser, function(req, res) {
 							request(process.env.WOWS_API_URL + '/wows/account/info/?application_id=' + api_key + '&account_id=' + player.id, function (err, rep, statsBody) {
 								if (!err && rep.statusCode == 200) {
 									var stats = JSON.parse(statsBody);
+									if (stats.meta.hidden) {
+										res.sendStatus(418);
+										return;
+									}
+									console.log(statsBody);
 									if (stats.status == "ok") {
 										if (stats.data[player.id] != null) {
 											stats = stats.data[player.id];
@@ -104,6 +109,10 @@ router.get('/ship', jsonParser, function(req, res) {
 						request(process.env.WOWS_API_URL + '/wows/ships/stats/?application_id=' + api_key + '&account_id=' + req.query.playerId + '&ship_id=' + req.query.shipId, function (error, response, body) {
 							if (!error && response.statusCode == 200) {
 								var json = JSON.parse(body);
+								if (json.meta.hidden) {
+									res.sendStatus(418);
+									return;
+								}
 								if (json.status == "ok") {
 									if (json.data[req.query.playerId] != null) {
 										var stats = json.data[req.query.playerId][0];
